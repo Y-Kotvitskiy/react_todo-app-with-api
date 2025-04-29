@@ -2,7 +2,13 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useEffect } from 'react';
 import { UserWarning } from './UserWarning';
-import { deleteTodo, getTodos, postTodo, USER_ID } from './api/todos';
+import {
+  deleteTodo,
+  getTodos,
+  createTodo,
+  USER_ID,
+  updateTodo,
+} from './api/todos';
 import { TodoList } from './components/TodoList';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
@@ -18,12 +24,6 @@ const getFilteredTodo = (todos: Todo[], query: FilterState): Todo[] => {
 
   return todos.filter(todo => todo.completed === (query === 'Completed'));
 };
-
-function wait(delay: number): Promise<void> {
-  return new Promise(resolve => {
-    setTimeout(resolve, delay);
-  });
-}
 
 export const App: React.FC = () => {
   const [loadingTodoId, setLoadingTodoId] = React.useState<Todo['id'] | null>(
@@ -95,7 +95,7 @@ export const App: React.FC = () => {
       inputRef.current.disabled = true;
     }
 
-    return postTodo(newTodo)
+    return createTodo(newTodo)
       .then(serverTodo => {
         setTodos([...todos, serverTodo]);
       })
@@ -116,16 +116,16 @@ export const App: React.FC = () => {
 
   const onChange = (todo: Todo, fieldsToUpdate: Partial<Todo>) => {
     setLoadingTodoId(todo.id);
+    const updatedTodo = { ...todo, ...fieldsToUpdate };
 
-    return wait(1)
-      .then(() => {
-        const updatedTodo = { ...todo, ...fieldsToUpdate };
+    return updateTodo(updatedTodo)
+      .then((serverTodo: Todo) => {
         const updatedTodos = [...todos];
         const index = updatedTodos.findIndex(
           currentTodo => currentTodo.id === todo.id,
         );
 
-        updatedTodos.splice(index, 1, updatedTodo);
+        updatedTodos.splice(index, 1, serverTodo);
         setTodos(updatedTodos);
       })
       .catch(error => {
