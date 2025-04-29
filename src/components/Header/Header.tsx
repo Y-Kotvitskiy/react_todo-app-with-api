@@ -1,12 +1,20 @@
+import cn from 'classnames';
 import { useState } from 'react';
 import { Todo } from '../../types/Todo';
 
 interface HeaderProps {
   onAdd: (todo: Partial<Todo>) => Promise<unknown>;
   inputRef: React.MutableRefObject<HTMLInputElement | null>;
+  onToggleCompleted: () => void;
+  hasNotCompleted: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onAdd, inputRef }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onAdd,
+  inputRef,
+  onToggleCompleted: onToggleNotCompleted,
+  hasNotCompleted,
+}) => {
   const [title, setTitle] = useState('');
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -19,8 +27,9 @@ export const Header: React.FC<HeaderProps> = ({ onAdd, inputRef }) => {
       {/* this button should have `active` class only if all todos are completed */}
       <button
         type="button"
-        className="todoapp__toggle-all active"
+        className={cn('todoapp__toggle-all', { active: !hasNotCompleted })}
         data-cy="ToggleAllButton"
+        onClick={onToggleNotCompleted}
       />
 
       <form onSubmit={handleSubmit}>

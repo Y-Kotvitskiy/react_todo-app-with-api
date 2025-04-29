@@ -30,6 +30,7 @@ export const App: React.FC = () => {
     null,
   );
   const [loadingCompleted, setLoadingCompleted] = React.useState(false);
+  const [loadingToggles, setLoadingToggle] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string>('');
   const [filterState, setFilterState] = React.useState<FilterState>('All');
   const [todos, setTodos] = React.useState<Todo[]>([]);
@@ -38,6 +39,7 @@ export const App: React.FC = () => {
   const [lastOperation, setLastOperation] = React.useState<ACTION>(
     ACTION.UNKNOWN,
   );
+  const [hasNotCompleted, setHasNotCompleted] = React.useState(true);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -45,6 +47,10 @@ export const App: React.FC = () => {
       .then(setTodos)
       .catch(() => setErrorMessage(MESSAGE.UNABLE_LOAD));
   }, []);
+
+  useEffect(() => {
+    setHasNotCompleted(todos.some(todo => todo.completed === false));
+  }, [todos]);
 
   useEffect(() => {
     setFilteredTodos(getFilteredTodo(todos, filterState));
@@ -58,6 +64,8 @@ export const App: React.FC = () => {
         clearTimeout(timeOutId);
       };
     }
+
+    return undefined;
   }, [errorMessage]);
 
   useEffect(() => {
@@ -189,17 +197,61 @@ export const App: React.FC = () => {
     );
   };
 
+  const onToggleCompleted = () => {
+    setErrorMessage('');
+    setLoadingToggle(true);
+
+    const toToggleTodos = todos.filter(
+      todo => todo.completed === !hasNotCompleted,
+    );
+    const promises = toToggleTodos.map(todo =>
+      updateTodo({ ...todo, completed: hasNotCompleted }),
+    );
+
+    Promise.allSettled(promises)
+      .then(results => {
+        let hasErrors = false;
+        const updatedTodo: Record<Todo['id'], Todo> = {};
+
+        results.forEach(result => {
+          if (result.status === 'fulfilled') {
+            const serverTodo: Todo = result.value;
+
+            updatedTodo[serverTodo.id] = serverTodo;
+          } else {
+            hasErrors = true;
+          }
+        });
+
+        if (Object.keys(updatedTodo).length > 0) {
+          setTodos(todos.map(todo => updatedTodo[todo.id] ?? todo));
+        }
+
+        if (hasErrors) {
+          setErrorMessage(MESSAGE.UNABLE_UPDARE);
+        }
+      })
+      .finally(() => setLoadingToggle(false));
+  };
+
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <Header onAdd={onAdd} inputRef={inputRef} />
+        <Header
+          onAdd={onAdd}
+          inputRef={inputRef}
+          hasNotCompleted={hasNotCompleted}
+          onToggleCompleted={onToggleCompleted}
+        />
         {todos.length ? (
           <>
             <TodoList
               lodingId={loadingTodoId}
               loadingCompleted={loadingCompleted}
+              loadingToggles={loadingToggles}
+              hasNotCompleted={hasNotCompleted}
               todos={filteredTodos}
               tempTodo={tempTodo}
               onChange={onChange}
