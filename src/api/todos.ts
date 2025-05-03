@@ -12,7 +12,7 @@ export const createTodo = (todo: Todo) => {
 };
 
 export const updateTodo = (todo: Todo) => {
-  return client.patch<Todo>(`/todos/${todo.id}?userId=${USER_ID}`, todo);
+  return client.patch<Todo>(`/todos/${todo.id}`, todo);
 };
 
 export const deleteTodo = (todoId: Todo['id']) => {

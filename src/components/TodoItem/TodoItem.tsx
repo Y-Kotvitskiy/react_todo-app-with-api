@@ -7,7 +7,7 @@ interface TodoProps {
   todo: Todo;
   isLoading: boolean;
   onChange: (todo: Todo, fieldsToUpdate: Partial<Todo>) => Promise<unknown>;
-  onDelete: (todoId: Todo) => void;
+  onDelete: (todoId: Todo) => Promise<unknown>;
 }
 
 export const TodoItem = ({
@@ -18,6 +18,7 @@ export const TodoItem = ({
 }: TodoProps) => {
   const [isEdit, setIsEdit] = useState(false);
   const [editValue, setEditValue] = useState('');
+  const { title, completed } = todo;
 
   const handleTitleClick = (
     event: React.MouseEvent<HTMLSpanElement, MouseEvent>,
@@ -30,6 +31,18 @@ export const TodoItem = ({
   };
 
   const handleSubmit = (currentTodo: Todo) => {
+    //debugger;
+    if (editValue.trim() === '') {
+      onDelete(currentTodo)
+        .then(() => setIsEdit(false))
+        .catch(error => {
+          // eslint-disable-next-line no-console
+          console.error(error);
+        });
+
+      return;
+    }
+
     onChange(currentTodo, { title: editValue })
       .then(() => setIsEdit(false))
       .catch(error => {
@@ -47,17 +60,14 @@ export const TodoItem = ({
   };
 
   return (
-    <div
-      data-cy="Todo"
-      className={cn('todo', { completed: todo.completed === true })}
-    >
+    <div data-cy="Todo" className={cn('todo', { completed })}>
       <label className="todo__status-label">
         <input
           data-cy="TodoStatus"
           type="checkbox"
           className="todo__status"
-          checked={todo.completed === true}
-          onChange={() => onChange(todo, { completed: !todo.completed })}
+          checked={completed === true}
+          onChange={() => onChange(todo, { completed: !completed })}
         />
       </label>
       {isEdit ? (
@@ -72,7 +82,7 @@ export const TodoItem = ({
             className="todo__title-field"
             placeholder="Empty todo will be deleted"
             value={editValue}
-            // autoFocus
+            autoFocus
             onChange={event => setEditValue(event.target.value)}
             onBlur={() => handleSubmit(todo)}
             onKeyUp={event => {
@@ -89,7 +99,7 @@ export const TodoItem = ({
             className="todo__title"
             onClick={event => handleTitleClick(event, todo)}
           >
-            {todo.title}
+            {title}
           </span>
           {/* Remove button appears only on hover */}
           <button

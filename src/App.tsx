@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserWarning } from './UserWarning';
 import {
   deleteTodo,
@@ -14,8 +14,8 @@ import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { Notification } from './components/Notification';
 import { Todo } from './types/Todo';
-import { FilterState } from './types/FilterStates';
 import { MESSAGE, ACTION } from './const';
+import { FilterState } from './types/FilterState';
 
 const getFilteredTodo = (todos: Todo[], query: FilterState): Todo[] => {
   if (query === 'All') {
@@ -26,20 +26,18 @@ const getFilteredTodo = (todos: Todo[], query: FilterState): Todo[] => {
 };
 
 export const App: React.FC = () => {
-  const [loadingTodoId, setLoadingTodoId] = React.useState<Todo['id'] | null>(
-    null,
-  );
-  const [loadingCompleted, setLoadingCompleted] = React.useState(false);
-  const [loadingToggles, setLoadingToggle] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState<string>('');
-  const [filterState, setFilterState] = React.useState<FilterState>('All');
-  const [todos, setTodos] = React.useState<Todo[]>([]);
-  const [filteredTodos, setFilteredTodos] = React.useState<Todo[]>([]);
-  const [tempTodo, setTempTodo] = React.useState<Todo | null>(null);
-  const [lastOperation, setLastOperation] = React.useState<ACTION>(
-    ACTION.UNKNOWN,
-  );
-  const [hasNotCompleted, setHasNotCompleted] = React.useState(true);
+  const [loadingTodoId, setLoadingTodoId] = useState<Todo['id'] | null>(null);
+  const [loadingCompleted, setLoadingCompleted] = useState(false);
+  const [loadingToggles, setLoadingToggle] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [filterState, setFilterState] = useState<FilterState>(FilterState.All);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
+  const [tempTodo, setTempTodo] = useState<Todo | null>(null);
+  const [lastOperation, setLastOperation] = useState<ACTION>(ACTION.UNKNOWN);
+  const [hasNotCompleted, setHasNotCompleted] = useState(true);
+  const [noTodos, setNoTodos] = useState(true);
+
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -54,6 +52,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     setFilteredTodos(getFilteredTodo(todos, filterState));
+    setNoTodos(todos.length === 0);
   }, [filterState, todos]);
 
   useEffect(() => {
@@ -78,7 +77,7 @@ export const App: React.FC = () => {
     return <UserWarning />;
   }
 
-  const itemsLeft = todos.filter(todo => todo.completed === false).length;
+  const itemsLeft = todos.filter(todo => !todo.completed).length;
 
   const onAdd = (todo: Partial<Todo>) => {
     setErrorMessage('');
@@ -242,6 +241,7 @@ export const App: React.FC = () => {
         <Header
           onAdd={onAdd}
           inputRef={inputRef}
+          noTodos={noTodos}
           hasNotCompleted={hasNotCompleted}
           onToggleCompleted={onToggleCompleted}
         />

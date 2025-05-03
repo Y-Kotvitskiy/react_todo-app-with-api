@@ -1,5 +1,5 @@
 import cn from 'classnames';
-import { FilterState } from '../../types/FilterStates';
+import { FilterState } from '../../types/FilterState';
 
 interface FooterProps {
   itemsLeft: number;
@@ -8,6 +8,8 @@ interface FooterProps {
   disableClearButton: boolean;
   onClearCompleted: () => void;
 }
+
+const filterStates: FilterState[] = Object.values(FilterState);
 
 export const Footer: React.FC<FooterProps> = ({
   itemsLeft,
@@ -26,38 +28,19 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Active link should have the 'selected' class */}
         <nav className="filter" data-cy="Filter">
-          <a
-            href="#/"
-            className={cn('filter__link', {
-              selected: filterState === 'All',
-            })}
-            data-cy="FilterLinkAll"
-            onClick={() => onFilter('All')}
-          >
-            All
-          </a>
-
-          <a
-            href="#/active"
-            className={cn('filter__link', {
-              selected: filterState === 'Active',
-            })}
-            data-cy="FilterLinkActive"
-            onClick={() => onFilter('Active')}
-          >
-            Active
-          </a>
-
-          <a
-            href="#/completed"
-            className={cn('filter__link', {
-              selected: filterState === 'Completed',
-            })}
-            data-cy="FilterLinkCompleted"
-            onClick={() => onFilter('Completed')}
-          >
-            Completed
-          </a>
+          {filterStates.map(state => (
+            <a
+              key={state}
+              href={`#/${state === FilterState.All ? '' : state.toLowerCase()}`}
+              className={cn('filter__link', {
+                selected: filterState === state,
+              })}
+              data-cy={`FilterLink${state}`}
+              onClick={() => onFilter(state)}
+            >
+              {state}
+            </a>
+          ))}
         </nav>
 
         {/* this button should be disabled if there are no completed todos */}

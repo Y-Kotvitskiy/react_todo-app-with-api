@@ -5,6 +5,7 @@ import { Todo } from '../../types/Todo';
 interface HeaderProps {
   onAdd: (todo: Partial<Todo>) => Promise<unknown>;
   inputRef: React.MutableRefObject<HTMLInputElement | null>;
+  noTodos: boolean;
   onToggleCompleted: () => void;
   hasNotCompleted: boolean;
 }
@@ -12,6 +13,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   onAdd,
   inputRef,
+  noTodos,
   onToggleCompleted: onToggleNotCompleted,
   hasNotCompleted,
 }) => {
@@ -25,13 +27,14 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="todoapp__header">
       {/* this button should have `active` class only if all todos are completed */}
-      <button
-        type="button"
-        className={cn('todoapp__toggle-all', { active: !hasNotCompleted })}
-        data-cy="ToggleAllButton"
-        onClick={onToggleNotCompleted}
-      />
-
+      {!noTodos && (
+        <button
+          type="button"
+          className={cn('todoapp__toggle-all', { active: !hasNotCompleted })}
+          data-cy="ToggleAllButton"
+          onClick={onToggleNotCompleted}
+        />
+      )}
       <form onSubmit={handleSubmit}>
         <input
           ref={inputRef}
