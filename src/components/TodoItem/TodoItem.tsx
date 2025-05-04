@@ -17,21 +17,16 @@ export const TodoItem = ({
   onDelete,
 }: TodoProps) => {
   const [isEdit, setIsEdit] = useState(false);
-  const [editValue, setEditValue] = useState('');
+  const [editValue, setEditValue] = useState(todo.title);
   const { title, completed } = todo;
 
-  const handleTitleClick = (
-    event: React.MouseEvent<HTMLSpanElement, MouseEvent>,
-    currentTodo: Todo,
-  ) => {
-    if (event.detail === 2) {
-      setIsEdit(true);
-      setEditValue(currentTodo.title);
-    }
-  };
-
   const handleSubmit = (currentTodo: Todo) => {
-    //debugger;
+    if (editValue.trim() === todo.title.trim()) {
+      setIsEdit(false);
+
+      return;
+    }
+
     if (editValue.trim() === '') {
       onDelete(currentTodo)
         .then(() => setIsEdit(false))
@@ -43,7 +38,7 @@ export const TodoItem = ({
       return;
     }
 
-    onChange(currentTodo, { title: editValue })
+    onChange(currentTodo, { title: editValue.trim() })
       .then(() => setIsEdit(false))
       .catch(error => {
         // eslint-disable-next-line no-console
@@ -97,7 +92,7 @@ export const TodoItem = ({
           <span
             data-cy="TodoTitle"
             className="todo__title"
-            onClick={event => handleTitleClick(event, todo)}
+            onDoubleClick={() => setIsEdit(true)}
           >
             {title}
           </span>

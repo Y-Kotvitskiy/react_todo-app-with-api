@@ -153,7 +153,10 @@ export const App: React.FC = () => {
       .then(() =>
         setTodos(todos.filter(currentTodo => todo.id !== currentTodo.id)),
       )
-      .catch(() => setErrorMessage(MESSAGE.UNABLE_DELETE))
+      .catch(error => {
+        setErrorMessage(MESSAGE.UNABLE_DELETE);
+        throw Error(error);
+      })
       .finally(() => {
         setLoadingTodoId(null);
         setLastOperation(ACTION.DELETE);
