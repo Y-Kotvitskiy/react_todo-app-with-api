@@ -11,7 +11,7 @@ interface TodoListProps {
   todos: Todo[];
   tempTodo: Todo | null;
   onChange: (todo: Todo, fieldsToUpdate: Partial<Todo>) => Promise<unknown>;
-  onDelete: (todoId: Todo) => void;
+  onDelete: (todoId: Todo) => Promise<unknown>;
 }
 
 export const TodoList: React.FC<TodoListProps> = ({
@@ -51,7 +51,7 @@ export const TodoList: React.FC<TodoListProps> = ({
               todo={tempTodo}
               onChange={onChange}
               onDelete={onDelete}
-              isLoading={true}
+              isLoading
             />
           </CSSTransition>
         ) : null}

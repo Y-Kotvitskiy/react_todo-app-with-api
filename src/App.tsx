@@ -32,11 +32,8 @@ export const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [filterState, setFilterState] = useState<FilterState>(FilterState.All);
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [lastOperation, setLastOperation] = useState<ACTION>(ACTION.UNKNOWN);
-  const [hasNotCompleted, setHasNotCompleted] = useState(true);
-  const [noTodos, setNoTodos] = useState(true);
 
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -46,14 +43,9 @@ export const App: React.FC = () => {
       .catch(() => setErrorMessage(MESSAGE.UNABLE_LOAD));
   }, []);
 
-  useEffect(() => {
-    setHasNotCompleted(todos.some(todo => todo.completed === false));
-  }, [todos]);
-
-  useEffect(() => {
-    setFilteredTodos(getFilteredTodo(todos, filterState));
-    setNoTodos(todos.length === 0);
-  }, [filterState, todos]);
+  const filteredTodos = getFilteredTodo(todos, filterState);
+  const noTodos = todos.length === 0;
+  const hasNotCompleted = todos.some(todo => todo.completed === false);
 
   useEffect(() => {
     if (errorMessage) {
@@ -71,7 +63,7 @@ export const App: React.FC = () => {
     if ([ACTION.ADD, ACTION.DELETE].includes(lastOperation)) {
       inputRef.current?.focus();
     }
-  }, [lastOperation, filteredTodos, errorMessage]);
+  }, [lastOperation, errorMessage]);
 
   if (!USER_ID) {
     return <UserWarning />;
@@ -248,7 +240,7 @@ export const App: React.FC = () => {
           hasNotCompleted={hasNotCompleted}
           onToggleCompleted={onToggleCompleted}
         />
-        {todos.length ? (
+        {todos.length && (
           <>
             <TodoList
               lodingId={loadingTodoId}
@@ -271,7 +263,7 @@ export const App: React.FC = () => {
               onClearCompleted={onClearCompleted}
             />
           </>
-        ) : null}
+        )}
       </div>
 
       <Notification
