@@ -252,7 +252,6 @@ export const App: React.FC = () => {
               onChange={onChange}
               onDelete={onDelete}
             />
-
             <Footer
               itemsLeft={itemsLeft}
               filterState={filterState}
