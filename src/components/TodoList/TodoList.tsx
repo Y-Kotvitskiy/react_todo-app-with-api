@@ -24,6 +24,14 @@ export const TodoList: React.FC<TodoListProps> = ({
   onChange,
   onDelete,
 }) => {
+  const isTodoLoading = (todo: Todo) => {
+    return (
+      lodingId === todo.id ||
+      (loadingCompleted && todo.completed) ||
+      (loadingToggles && (hasNotCompleted ? !todo.completed : todo.completed))
+    );
+  };
+
   return (
     <section className="todoapp__main" data-cy="TodoList">
       <TransitionGroup>
@@ -34,14 +42,7 @@ export const TodoList: React.FC<TodoListProps> = ({
               todo={todo}
               onChange={onChange}
               onDelete={onDelete}
-              isLoading={
-                lodingId === todo.id ||
-                (loadingCompleted && todo.completed) ||
-                (loadingToggles &&
-                  (hasNotCompleted
-                    ? todo.completed === false
-                    : todo.completed === true))
-              }
+              isLoading={isTodoLoading(todo)}
             />
           </CSSTransition>
         ))}

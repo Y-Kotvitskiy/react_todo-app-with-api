@@ -22,7 +22,9 @@ const getFilteredTodo = (todos: Todo[], query: FilterState): Todo[] => {
     return todos;
   }
 
-  return todos.filter(todo => todo.completed === (query === 'Completed'));
+  return todos.filter(
+    todo => todo.completed === (query === FilterState.Completed),
+  );
 };
 
 export const App: React.FC = () => {
@@ -45,7 +47,7 @@ export const App: React.FC = () => {
 
   const filteredTodos = getFilteredTodo(todos, filterState);
   const noTodos = todos.length === 0;
-  const hasNotCompleted = todos.some(todo => todo.completed === false);
+  const hasNotCompleted = todos.some(todo => !todo.completed);
 
   useEffect(() => {
     if (errorMessage) {
@@ -255,9 +257,7 @@ export const App: React.FC = () => {
             <Footer
               itemsLeft={itemsLeft}
               filterState={filterState}
-              disableClearButton={
-                !filteredTodos.some(todo => todo.completed === true)
-              }
+              disableClearButton={!filteredTodos.some(todo => todo.completed)}
               onFilter={onFilter}
               onClearCompleted={onClearCompleted}
             />
